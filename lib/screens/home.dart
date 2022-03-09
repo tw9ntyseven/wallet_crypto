@@ -4,8 +4,6 @@ import 'package:wallet_fltr/screens/coin-view.dart';
 class Home extends StatelessWidget {
   const Home({Key? key}) : super(key: key);
 
-// Object earth;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

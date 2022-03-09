@@ -79,8 +79,6 @@ class _CoinViewState extends State<CoinView> {
                           TextStyle(fontSize: 22, fontWeight: FontWeight.w700))
                 ],
               ),
-
-              // OOooOOoOoooOoOO
               coinStats(widget.datas),
             ],
           ),
