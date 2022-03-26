@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:wallet_fltr/screens/coin-view.dart';
+import 'package:wallet_fltr/screens/notification.dart';
+import 'package:wallet_fltr/screens/profile.dart';
 
 class Converter extends StatefulWidget {
   const Converter({Key? key}) : super(key: key);
@@ -22,9 +24,15 @@ class _ConverterState extends State<Converter> {
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            CircleAvatar(
-              radius: 15,
-              backgroundImage: AssetImage('lib/assets/images/avatar.jpg'),
+            InkWell(
+              onTap: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => new Profile()));
+              },
+              child: CircleAvatar(
+                radius: 15,
+                backgroundImage: AssetImage('lib/assets/images/avatar.jpg'),
+              ),
             ),
             Text(
               "Converter",
@@ -35,7 +43,10 @@ class _ConverterState extends State<Converter> {
                 Icons.notifications_none_outlined,
                 color: Colors.black,
               ),
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => new Notif()));
+              },
             ),
           ],
         ),

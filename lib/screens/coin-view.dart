@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_cube/flutter_cube.dart';
 import 'package:sparkline/sparkline.dart';
+import 'package:wallet_fltr/screens/notification.dart';
 
 class CoinView extends StatefulWidget {
   String coinName;
@@ -47,7 +48,10 @@ class _CoinViewState extends State<CoinView> {
                   Icons.notifications_none_outlined,
                   color: Colors.black,
                 ),
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => new Notif()));
+                },
               ),
             ],
           ),
@@ -63,7 +67,7 @@ class _CoinViewState extends State<CoinView> {
                 child: Cube(
                   onSceneCreated: (Scene scene) {
                     scene.world.add(Object(
-                        fileName: 'lib/assets/3d/earth/earth_ball.obj',
+                        fileName: 'lib/assets/3d/coin/dogecoin.obj',
                         scale: Vector3.all(9)));
                   },
                 ),

@@ -70,6 +70,9 @@ flutter:
     - lib/assets/3d/earth/earth_ball.jpg
     - lib/assets/3d/earth/earth_ball.mtl
     - lib/assets/3d/earth/earth_ball.obj
+    - lib/assets/3d/coin/dogecoin.obj
+    - lib/assets/3d/coin/dogecoin.jpg
+    - lib/assets/3d/coin/dogecoin.mtl
 
 
 

@@ -55,7 +55,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             label: "",
-            icon: Icon(Icons.home),
+            icon: Icon(Icons.home_outlined),
           ),
           BottomNavigationBarItem(
             label: "",
@@ -63,7 +63,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
           ),
           BottomNavigationBarItem(
             label: "",
-            icon: Icon(Icons.equalizer),
+            icon: Icon(Icons.timeline_outlined),
           ),
           BottomNavigationBarItem(
             label: "",
