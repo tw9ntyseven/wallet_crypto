@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:wallet_fltr/screens/converter.dart';
+import 'package:wallet_fltr/screens/cryptocurrency.dart';
 import 'package:wallet_fltr/screens/home.dart';
 import 'package:wallet_fltr/screens/statistics.dart';
-import 'package:wallet_fltr/screens/wallet.dart';
+// import 'package:wallet_fltr/screens/wallet.dart';
 
 class App extends StatelessWidget {
   const App({Key? key}) : super(key: key);
@@ -33,7 +34,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
     Home(),
     Converter(),
     Stat(),
-    Wallet()
+    CryptoList(),
   ];
 
   void _onItemTapped(int index) {
