@@ -9,6 +9,9 @@ import 'package:wallet_fltr/screens/coin-view.dart';
 import 'package:wallet_fltr/screens/notification.dart';
 import 'package:wallet_fltr/screens/profile.dart';
 
+import 'package:wallet_fltr/models/article_model.dart';
+import 'package:wallet_fltr/service/api_service.dart';
+
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
 
@@ -17,7 +20,9 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  ApiService client = ApiService();
   List _cryptoList = [];
+  List _newsList = [];
   final _saved = Set<Map>();
   final _boldStyle = new TextStyle(fontWeight: FontWeight.bold);
   bool _loading = false;
@@ -98,6 +103,17 @@ class _HomeState extends State<Home> {
         crypto['name'],
         "https://s2.coinmarketcap.com/static/img/coins/64x64/${crypto['id']}.png",
         context);
+  }
+
+  Widget _buildNews(Article article, BuildContext context) {
+    return newsCard(
+        article.urlToImage != null
+            ? article.urlToImage
+            : "https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=764&q=80",
+        article.author,
+        article.publishedAt,
+        article.title,
+        article.description);
   }
 
   @override
@@ -187,31 +203,22 @@ class _HomeState extends State<Home> {
               height: 300,
               child: Padding(
                 padding: EdgeInsets.fromLTRB(15.0, 20.0, 10.0, 0),
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  children: <Widget>[
-                    newsCard(
-                        "https://images.unsplash.com/photo-1517586979036-b7d1e86b3345?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=688&q=80",
-                        "6K",
-                        "688",
-                        "Blockchain Life 2022",
-                        "At the end of October, host the seventh Blockchain..."),
-                    Padding(padding: EdgeInsets.only(right: 15)),
-                    newsCard(
-                        "https://images.unsplash.com/photo-1484353371297-d8cfd2895020?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1179&q=80",
-                        "12K",
-                        "388",
-                        "New York Crypto Life 2022",
-                        "At the end of October, host the seventh Blockchain..."),
-                    Padding(padding: EdgeInsets.only(right: 15)),
-                    newsCard(
-                        "https://images.unsplash.com/photo-1605792657660-596af9009e82?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1102&q=80",
-                        "111K",
-                        "86K",
-                        "Crypto Coin 2022",
-                        "At the end of October, host the seventh Blockchain..."),
-                  ],
-                ),
+                child: FutureBuilder(
+                    future: client.getArticle(),
+                    builder: (BuildContext context,
+                        AsyncSnapshot<List<Article>> snapshot) {
+                      if (snapshot.hasData) {
+                        List<Article>? articles = snapshot.data;
+                        return ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: articles?.length,
+                            itemBuilder: (context, index) =>
+                                _buildNews(articles![index], context));
+                      }
+                      return Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }),
               ),
             ),
           ],
@@ -338,59 +345,63 @@ Widget peopleItem(String _image) {
 
 Widget newsCard(String _imageCard, String _review, String _favorite,
     String _titleCard, String _subtitleCard) {
-  return InkWell(
-    child: Container(
-      width: 300,
-      height: 300,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        image: DecorationImage(
-          image: NetworkImage(_imageCard),
-          fit: BoxFit.cover,
+  return Padding(
+    padding: const EdgeInsets.only(right: 15.0),
+    child: InkWell(
+      child: Container(
+        width: 300,
+        height: 300,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          image: DecorationImage(
+            image: NetworkImage(_imageCard),
+            fit: BoxFit.cover,
+          ),
         ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  Icons.remove_red_eye_outlined,
-                  color: Colors.white,
-                ),
-                Padding(padding: EdgeInsets.only(right: 5)),
-                Text(
-                  _review,
-                  style: TextStyle(color: Colors.white),
-                ),
-                Padding(padding: EdgeInsets.only(right: 10)),
-                Icon(
-                  Icons.favorite_outline,
-                  color: Colors.white,
-                ),
-                Padding(padding: EdgeInsets.only(right: 5)),
-                Text(
-                  _favorite,
-                  style: TextStyle(color: Colors.white),
-                ),
-              ],
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(_titleCard,
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700)),
-                Padding(padding: EdgeInsets.only(top: 10)),
-                Text(_subtitleCard, style: TextStyle(color: Colors.grey[300])),
-              ],
-            )
-          ],
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.remove_red_eye_outlined,
+                    color: Colors.white,
+                  ),
+                  Padding(padding: EdgeInsets.only(right: 5)),
+                  Text(
+                    _review,
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  Padding(padding: EdgeInsets.only(right: 10)),
+                  Icon(
+                    Icons.favorite_outline,
+                    color: Colors.white,
+                  ),
+                  Padding(padding: EdgeInsets.only(right: 5)),
+                  Text(
+                    _favorite,
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ],
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(_titleCard,
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700)),
+                  Padding(padding: EdgeInsets.only(top: 10)),
+                  Text(_subtitleCard,
+                      style: TextStyle(color: Colors.grey[300])),
+                ],
+              )
+            ],
+          ),
         ),
       ),
     ),
