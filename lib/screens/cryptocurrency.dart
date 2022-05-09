@@ -30,8 +30,6 @@ class CryptoListState extends State<CryptoList> {
 // Function getting from API crypto DATA
   Future<void> getCryptoPrices() async {
     List cryptoDatas = [];
-
-    print('getting crypto prices');
     String _apiURL =
         "https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?id=1,2,3,4,5,6,7,8,9,10";
     setState(() {
@@ -59,6 +57,7 @@ class CryptoListState extends State<CryptoList> {
     int decimals = 2;
     num fac = pow(10, decimals);
     double d = (crypto['quote']['USD']['price']);
+    // print(crypto['quote']['USD']['price']);
     return "\$" + (d = (d * fac).round() / fac).toString();
   }
 
@@ -127,6 +126,7 @@ class CryptoListState extends State<CryptoList> {
         body: _getMainBody());
   }
 
+  //Function for open list of a favorite crypto coins
   void _pushSaved() {
     Navigator.of(context).push(
       new MaterialPageRoute<void>(
@@ -149,7 +149,37 @@ class CryptoListState extends State<CryptoList> {
           ).toList();
           return new Scaffold(
             appBar: new AppBar(
-              title: const Text('Saved Cryptos'),
+              automaticallyImplyLeading: false,
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                    icon: Icon(
+                      Icons.arrow_back,
+                      color: Colors.black,
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                  Text(
+                    "Favorites Crypto Coin",
+                    style: TextStyle(color: Colors.black),
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      Icons.notifications_none_outlined,
+                      color: Colors.black,
+                    ),
+                    onPressed: () {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) => new Notif()));
+                    },
+                  ),
+                ],
+              ),
+              elevation: 0,
+              backgroundColor: Colors.white,
             ),
             body: new ListView(children: divided),
           );

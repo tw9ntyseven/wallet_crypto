@@ -1,10 +1,104 @@
 import 'package:flutter/material.dart';
+import 'dart:math';
+import 'dart:async';
+import 'dart:convert';
+import 'dart:core';
+import 'package:http/http.dart' as http;
+
 import 'package:wallet_fltr/screens/coin-view.dart';
 import 'package:wallet_fltr/screens/notification.dart';
 import 'package:wallet_fltr/screens/profile.dart';
 
-class Home extends StatelessWidget {
+class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
+
+  @override
+  State<Home> createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
+  List _cryptoList = [];
+  final _saved = Set<Map>();
+  final _boldStyle = new TextStyle(fontWeight: FontWeight.bold);
+  bool _loading = false;
+  final List<MaterialColor> _colors = [
+    Colors.blue,
+    Colors.indigo,
+    Colors.lime,
+    Colors.teal,
+    Colors.cyan
+  ];
+
+  // Function getting from API crypto DATA
+  Future<void> getCryptoPrices() async {
+    List cryptoDatas = [];
+    String _apiURL =
+        "https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?id=1,2,3,4,5,6,7,8,9,10";
+    setState(() {
+      this._loading = true;
+    });
+    http.Response response = await http.get(Uri.parse(_apiURL),
+        headers: {"X-CMC_PRO_API_KEY": "97c1020e-854b-4367-a2cd-84546155371e"});
+
+    Map<String, dynamic> responseJSON = json.decode(response.body);
+    if (responseJSON["status"]["error_code"] == 0) {
+      for (int i = 1; i <= responseJSON["data"].length; i++) {
+        cryptoDatas.add(responseJSON["data"][i.toString()]);
+      }
+    }
+    print(cryptoDatas);
+
+    setState(() {
+      this._cryptoList = cryptoDatas;
+      this._loading = false;
+    });
+    return;
+  }
+
+// Function for taking and modifing crypto price
+  String cryptoPrice(Map crypto) {
+    int decimals = 2;
+    num fac = pow(10, decimals);
+    double d = (crypto['quote']['USD']['price']);
+    return "\$" + (d = (d * fac).round() / fac).toString();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getCryptoPrices();
+  }
+
+// Loading view
+  CircleAvatar _getLeadingWidget(String name, MaterialColor color) {
+    return new CircleAvatar(
+      backgroundColor: color,
+      child: new Text(name[0]),
+    );
+  }
+
+//widget for display crypto
+  Widget _buildRow(Map crypto, MaterialColor color) {
+    final bool favourited = _saved.contains(crypto);
+    void _fav() {
+      setState(() {
+        if (favourited) {
+          _saved.remove(crypto);
+        } else {
+          _saved.add(crypto);
+        }
+      });
+    }
+
+    return coinCard(
+        color,
+        crypto['symbol'],
+        "",
+        cryptoPrice(crypto),
+        crypto['name'],
+        "https://s2.coinmarketcap.com/static/img/coins/64x64/${crypto['id']}.png",
+        context);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,38 +144,18 @@ class Home extends StatelessWidget {
               height: 200,
               color: Theme.of(context).scaffoldBackgroundColor,
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(15.0, 10.0, 10.0, 0),
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  children: <Widget>[
-                    // BITCOIN BTC BTC
-                    coinCard(Colors.blue[100], "BTC", "+6%", "6.0286",
-                        "Bitcoin", "lib/assets/icons/bitcoin.png", context),
-
-                    Padding(padding: EdgeInsets.only(right: 10)),
-
-                    // ETH ETH ETH ETH
-                    coinCard(Colors.purple[100], "ETH", "+18%", "0.0086",
-                        "Ethereum", "lib/assets/icons/eth.png", context),
-
-                    Padding(padding: EdgeInsets.only(right: 10)),
-
-                    // DOGE DOGE DOGE
-                    coinCard(Colors.green[100], "DOGE", "+118%", "16.800",
-                        "Dogecoin", "lib/assets/icons/doge.png", context),
-
-                    Padding(padding: EdgeInsets.only(right: 10)),
-
-                    // USD USD USD
-                    coinCard(Colors.blueGrey[100], "USDT", "+78%", "7.860",
-                        "Dollars", "lib/assets/icons/usd.png", context),
-
-                    Padding(padding: EdgeInsets.only(right: 10)),
-
-                    coinCard(Colors.orange[100], "TON", "+0.039", "1.651",
-                        "Toncoin", "lib/assets/icons/usd.png", context)
-                  ],
-                ),
+                padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0),
+                child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: _cryptoList.length,
+                    padding: const EdgeInsets.all(16.0),
+                    itemBuilder: (context, i) {
+                      final index = i;
+                      print(index);
+                      final MaterialColor color =
+                          _colors[index % _colors.length];
+                      return _buildRow(_cryptoList[index], color);
+                    }),
               ),
             ),
             Container(
@@ -149,83 +223,87 @@ class Home extends StatelessWidget {
 
 Widget coinCard(_color, String _coinName, String _coinUpd, String _coinPrice,
     String _coinFullName, String _imageCoin, context) {
-  return InkWell(
-    onTap: () {
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => new CoinView(
-                    datas: [
-                      0.0,
-                      1.0,
-                      1.5,
-                      2.0,
-                      0.0,
-                      0.0,
-                      -0.5,
-                      -1.0,
-                      -0.5,
-                      0.0,
-                      0.0
+  return Padding(
+    padding: const EdgeInsets.only(right: 10.0),
+    child: InkWell(
+      onTap: () {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => new CoinView(
+                      datas: [
+                        0.0,
+                        1.0,
+                        1.5,
+                        2.0,
+                        0.0,
+                        0.0,
+                        -0.5,
+                        -1.0,
+                        -0.5,
+                        0.0,
+                        0.0
+                      ],
+                      coinName: _coinName,
+                      coinFullName: _coinFullName,
+                      coinCost: _coinPrice,
+                    )));
+      },
+      child: Container(
+        width: 150,
+        height: 200,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          color: _color,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(15.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        _coinName,
+                        style: TextStyle(
+                            fontSize: 14, fontWeight: FontWeight.w700),
+                      ),
+                      Text(
+                        _coinUpd,
+                        style: TextStyle(color: Colors.grey[600]),
+                      ),
                     ],
-                    coinName: _coinName,
-                    coinFullName: _coinFullName,
-                    coinCost: _coinPrice,
-                  )));
-    },
-    child: Container(
-      width: 150,
-      height: 200,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        color: _color,
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(15.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      _coinName,
-                      style:
-                          TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
-                    ),
-                    Text(
-                      _coinUpd,
-                      style: TextStyle(color: Colors.grey[600]),
-                    ),
-                  ],
-                ),
-                Padding(padding: EdgeInsets.only(bottom: 7)),
-                Row(
-                  children: [
-                    Text(
-                      _coinPrice,
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
-                    )
-                  ],
-                ),
-              ],
-            ),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Image.asset(
-                  _imageCoin,
-                  height: 20,
-                  width: 20,
-                ),
-                Padding(padding: EdgeInsets.only(right: 8)),
-                Text(_coinFullName),
-              ],
-            ),
-          ],
+                  ),
+                  Padding(padding: EdgeInsets.only(bottom: 7)),
+                  Row(
+                    children: [
+                      Text(
+                        _coinPrice,
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.w700),
+                      )
+                    ],
+                  ),
+                ],
+              ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Image.network(
+                    _imageCoin,
+                    height: 20,
+                    width: 20,
+                  ),
+                  // https://s2.coinmarketcap.com/static/img/coins/64x64/1.png
+                  Padding(padding: EdgeInsets.only(right: 8)),
+                  Text(_coinFullName),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     ),
