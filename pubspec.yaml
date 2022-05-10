@@ -35,6 +35,7 @@ dependencies:
   cupertino_icons: ^1.0.2
   sparkline: ^1.0.0
   flutter_cube: ^0.1.1
+  intl: ^0.17.0
   # cached_network_image: ^3.2.0
   # webview_flutter: ^3.0.2
 

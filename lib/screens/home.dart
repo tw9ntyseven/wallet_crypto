@@ -4,11 +4,12 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:core';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
+import 'package:wallet_fltr/screens/article-view.dart';
 
 import 'package:wallet_fltr/screens/coin-view.dart';
 import 'package:wallet_fltr/screens/notification.dart';
 import 'package:wallet_fltr/screens/profile.dart';
-
 import 'package:wallet_fltr/models/article_model.dart';
 import 'package:wallet_fltr/service/api_service.dart';
 
@@ -106,14 +107,19 @@ class _HomeState extends State<Home> {
   }
 
   Widget _buildNews(Article article, BuildContext context) {
+    var tempDate = DateTime.parse(article.publishedAt);
+    var date = DateFormat.yMMMd().format(tempDate);
+
     return newsCard(
         article.urlToImage != null
             ? article.urlToImage
             : "https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=764&q=80",
         article.author,
-        article.publishedAt,
+        date,
         article.title,
-        article.description);
+        article.description,
+        context,
+        article);
   }
 
   @override
@@ -344,13 +350,20 @@ Widget peopleItem(String _image) {
 }
 
 Widget newsCard(String _imageCard, String _review, String _favorite,
-    String _titleCard, String _subtitleCard) {
+    String _titleCard, String _subtitleCard, context, Article article) {
   return Padding(
     padding: const EdgeInsets.only(right: 15.0),
     child: InkWell(
+      onTap: () {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => ArticlePage(article: article)));
+      },
       child: Container(
         width: 300,
         height: 300,
+        clipBehavior: Clip.hardEdge,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
           image: DecorationImage(
@@ -359,46 +372,85 @@ Widget newsCard(String _imageCard, String _review, String _favorite,
           ),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(20.0),
+          padding: const EdgeInsets.all(0.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Icon(
-                    Icons.remove_red_eye_outlined,
-                    color: Colors.white,
+              Container(
+                height: 60,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                      colors: [
+                        Color.fromARGB(159, 62, 60, 60),
+                        Color.fromARGB(0, 45, 53, 55),
+                      ],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      stops: [0.0, 1.0],
+                      tileMode: TileMode.clamp),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.people,
+                        color: Colors.white,
+                      ),
+                      Padding(padding: EdgeInsets.only(right: 5)),
+                      Flexible(
+                        child: RichText(
+                          overflow: TextOverflow.ellipsis,
+                          strutStyle: StrutStyle(fontSize: 12.0),
+                          text: TextSpan(
+                              style: TextStyle(color: Colors.white),
+                              text: _review),
+                        ),
+                      ),
+                      Padding(padding: EdgeInsets.only(right: 10)),
+                      Icon(
+                        Icons.calendar_today,
+                        size: 20,
+                        color: Colors.white,
+                      ),
+                      Padding(padding: EdgeInsets.only(right: 5)),
+                      Text(
+                        _favorite,
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ],
                   ),
-                  Padding(padding: EdgeInsets.only(right: 5)),
-                  Text(
-                    _review,
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  Padding(padding: EdgeInsets.only(right: 10)),
-                  Icon(
-                    Icons.favorite_outline,
-                    color: Colors.white,
-                  ),
-                  Padding(padding: EdgeInsets.only(right: 5)),
-                  Text(
-                    _favorite,
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ],
+                ),
               ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(_titleCard,
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700)),
-                  Padding(padding: EdgeInsets.only(top: 10)),
-                  Text(_subtitleCard,
-                      style: TextStyle(color: Colors.grey[300])),
-                ],
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                      colors: [
+                        Color.fromARGB(159, 62, 60, 60),
+                        Color.fromARGB(0, 45, 53, 55),
+                      ],
+                      begin: Alignment.bottomCenter,
+                      end: Alignment.topCenter,
+                      stops: [0.0, 1.0],
+                      tileMode: TileMode.clamp),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(_titleCard,
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700)),
+                      Padding(padding: EdgeInsets.only(top: 10)),
+                      Text(_subtitleCard,
+                          style: TextStyle(color: Colors.grey[300])),
+                    ],
+                  ),
+                ),
               )
             ],
           ),
